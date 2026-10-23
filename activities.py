@@ -1,4 +1,5 @@
 ﻿import json
+import os
 from pathlib import Path
 from temporalio import activity
 
@@ -10,10 +11,13 @@ def _log(row: dict) -> None:
 
 @activity.defn
 async def archive_email(mid: str) -> str:
-    _log({"mid": mid, "action": "archived"})
+    attempt = activity.info().attempt
+    if os.environ.get("FLAKY") and attempt == 1:
+        raise RuntimeError("simulated flaky archive call")
+    _log({"mid": mid, "action": "archived", "attempt": attempt})
     return "archived"
 
 @activity.defn
 async def escalate_email(mid: str) -> str:
-    _log({"mid": mid, "action": "escalated"})
+    _log({"mid": mid, "action": "escalated", "attempt": activity.info().attempt})
     return "escalated"

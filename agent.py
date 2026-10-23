@@ -59,18 +59,18 @@ def fetch_bodies(mids):
 
 
 def summarize(c):
-    content = PROMPT.format(subject=c["subject"], body=strip_forwarded(c["body"]))
+    content = PROMPT.format(subject=c["subject"], body=(c["body"] if os.environ.get("RAW_BODY") else strip_forwarded(c["body"])))
     attrs = {
         "gen_ai.operation.name": "chat", "gen_ai.provider.name": "ollama",
         "gen_ai.request.model": MODEL, "gen_ai.agent.name": AGENT,
-        "gen_ai.pipeline.name": PIPELINE, "gen_ai.request.temperature": 0.2,
+        "gen_ai.pipeline.name": PIPELINE, "gen_ai.request.temperature": 0,
         "gen_ai.input.messages": json.dumps(
             [{"role": "user", "parts": [{"type": "text", "content": content}]}]),
     }
     with span("gen_ai.chat", "chat " + MODEL, attrs) as s:
         try:
             t = time.time()
-            resp = ollama.chat(model=MODEL, options={"temperature": 0.2},
+            resp = ollama.chat(model=MODEL, options={"temperature": 0, "seed": 42},
                                messages=[{"role": "user", "content": content}])
             dt = time.time() - t
         except Exception as exc:
