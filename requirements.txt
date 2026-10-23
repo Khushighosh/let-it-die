@@ -1,0 +1,6 @@
+﻿pandas
+scikit-learn
+tabpfn-client
+temporalio
+ollama
+sentry-sdk
